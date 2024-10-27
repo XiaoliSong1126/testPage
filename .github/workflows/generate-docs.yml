@@ -1,0 +1,39 @@
+name: Build and Deploy Docs
+
+on:
+  push:
+    branches:
+      - main
+
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Doxygen Action
+        uses: mattnotmitt/doxygen-action@1.9.8
+        with:
+          doxyfile-path: ./Doxyfile
+          working-directory: .
+          enable-latex: false
+          additional-packages: graphviz ttf-freefont
+
+      - name: Upload Doxygen Docs
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: doxygen-docs
+          path: doc/html
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 6
+          overwrite: true
+
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5.0.0
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          enablement: true
